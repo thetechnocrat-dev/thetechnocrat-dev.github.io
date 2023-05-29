@@ -3,11 +3,16 @@
 <head>
     <title>Godel's Gauntlet</title>
     <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { position: absolute; top: 0; left: 0; }
+        body { position: relative; }
+        a { position: absolute; top: 10px; left: 10px; z-index: 2; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
     </style>
 </head>
 <body>
+    <a href="https://github.com/thetechnocrat-dev/thetechnocrat-dev.github.io/blob/main/index.html#L158" target="_blank">
+      <img src="github-logo.png" alt="GitHub Logo" width="24" height="24">
+      <span>This game is open source</span>
+    </a>
     <canvas id="gameCanvas"></canvas>
     <script>
         var canvas = document.getElementById('gameCanvas');
@@ -38,16 +43,18 @@
 
         // Listen for click events
         canvas.addEventListener('click', function(e) {
-            var rect = canvas.getBoundingClientRect();
-            var clickX = e.clientX - rect.left;
-            var clickY = e.clientY - rect.top;
+            if (e.target.nodeName !== 'A') {
+                var rect = canvas.getBoundingClientRect();
+                var clickX = e.clientX - rect.left;
+                var clickY = e.clientY - rect.top;
 
-            // Set the player's target
-            player.target = { x: clickX, y: clickY };
+                // Set the player's target
+                player.target = { x: clickX, y: clickY };
 
-            // Store the last click position
-            lastClick.x = clickX;
-            lastClick.y = clickY;
+                // Store the last click position
+                lastClick.x = clickX;
+                lastClick.y = clickY;
+            }
         });
 
         // Main game loop
@@ -175,5 +182,11 @@
 
         gameLoop();
     </script>
+    <script>
+        var githubLink = document.getElementById('github-link');
+        githubLink.addEventListener('click', function(event) {
+          event.stopPropagation();
+        });
+      </script>
 </body>
 </html>
