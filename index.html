@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gödel's Gauntlet</title>
+    <title>Godel's Gauntlet</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { position: absolute; top: 0; left: 0; }
@@ -36,35 +36,47 @@
             angle3: 0 
         };
 
-        // Listen for keydown events
-        window.addEventListener('keydown', function(e) {
-            var acceleration = player.speed;
-            if(e.key === 'ArrowUp' || e.key === 'w') player.vy -= acceleration;
-            if(e.key === 'ArrowDown' || e.key === 's') player.vy += acceleration;
-            if(e.key === 'ArrowLeft' || e.key === 'a') player.vx -= acceleration;
-            if(e.key === 'ArrowRight' || e.key === 'd') player.vx += acceleration;
-        });
+        // Listen for click events
+        canvas.addEventListener('click', function(e) {
+            var rect = canvas.getBoundingClientRect();
+            var clickX = e.clientX - rect.left;
+            var clickY = e.clientY - rect.top;
 
-        // Listen for deviceorientation events
-        window.addEventListener('deviceorientation', function(e) {
-            var acceleration = player.speed;
-            player.vx += Math.sin(e.alpha * Math.PI / 180) * acceleration;
-            player.vy += Math.sin((e.beta - 90) * Math.PI / 180) * acceleration;
+            // Set the player's target
+            player.target = { x: clickX, y: clickY };
+
+            // Store the last click position
+            lastClick.x = clickX;
+            lastClick.y = clickY;
         });
 
         // Main game loop
         function gameLoop() {
-            // Apply velocity to player position
-            if (!player.reset) {
-                player.x += player.vx;
-                player.y += player.vy;
-            }
+            // Move towards target if it exists
+            if(player.target) {
+                var dx = player.target.x - player.x;
+                var dy = player.target.y - player.y;
+                var distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Limit speed
-            var speed = Math.sqrt(player.vx * player.vx + player.vy * player.vy);
-            if(speed > player.maxSpeed) {
-                player.vx *= player.maxSpeed / speed;
-                player.vy *= player.maxSpeed / speed;
+                if(distance > 1) {
+                    // Apply velocity to player position
+                    player.vx = dx / distance * player.speed;
+                    player.vy = dy / distance * player.speed;
+                    player.x += player.vx;
+                    player.y += player.vy;
+
+                    // Accelerate
+                    player.speed += 0.1;
+                    if(player.speed > player.maxSpeed) {
+                        player.speed = player.maxSpeed;
+                    }
+                } else {
+                    // Decelerate
+                    player.speed -= 0.1;
+                    if(player.speed < 0) {
+                        player.speed = 0;
+                    }
+                }
             }
 
             // Clear the canvas
