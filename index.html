@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gödel's Gauntlet</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { position: absolute; top: 0; left: 0; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById('gameCanvas');
+        var ctx = canvas.getContext('2d');
+
+        // Set canvas size to fill the window
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Player and goal objects
+        var player = { 
+            x: canvas.width / 2, 
+            y: 50,
+            radius: 20, 
+            vx: 0, 
+            vy: 0, 
+            speed: 0.1, 
+            maxSpeed: 3
+        };
+        var goal = { 
+            x: canvas.width / 2, 
+            y: canvas.height / 2, 
+            radius: 30, 
+            angle1: 0, 
+            angle2: 0, 
+            angle3: 0 
+        };
+
+        // Listen for keydown events
+        window.addEventListener('keydown', function(e) {
+            var acceleration = player.speed;
+            if(e.key === 'ArrowUp' || e.key === 'w') player.vy -= acceleration;
+            if(e.key === 'ArrowDown' || e.key === 's') player.vy += acceleration;
+            if(e.key === 'ArrowLeft' || e.key === 'a') player.vx -= acceleration;
+            if(e.key === 'ArrowRight' || e.key === 'd') player.vx += acceleration;
+        });
+
+        // Listen for deviceorientation events
+        window.addEventListener('deviceorientation', function(e) {
+            var acceleration = player.speed;
+            player.vx += Math.sin(e.alpha * Math.PI / 180) * acceleration;
+            player.vy += Math.sin((e.beta - 90) * Math.PI / 180) * acceleration;
+        });
+
+        // Main game loop
+        function gameLoop() {
+            // Apply velocity to player position
+            if (!player.reset) {
+                player.x += player.vx;
+                player.y += player.vy;
+            }
+
+            // Limit speed
+            var speed = Math.sqrt(player.vx * player.vx + player.vy * player.vy);
+            if(speed > player.maxSpeed) {
+                player.vx *= player.maxSpeed / speed;
+                player.vy *= player.maxSpeed / speed;
+            }
+
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Create and store the path for the first rotating circle
+            var circlePath1 = new Path2D();
+            goal.angle1 += 0.01;
+            var startAngle = goal.angle1;
+            var endAngle = startAngle + Math.PI * 2 - player.radius * 3 / goal.radius;
+            circlePath1.arc(goal.x, goal.y, goal.radius * 3, startAngle, endAngle);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 5;
+            ctx.stroke(circlePath1);
+
+            // Create and store the path for the second rotating circle
+            var circlePath2 = new Path2D();
+            goal.angle2 -= 0.01;
+            startAngle = goal.angle2;
+            endAngle = startAngle + Math.PI * 2 - player.radius * 3 / goal.radius;
+            circlePath2.arc(goal.x, goal.y, goal.radius * 2.5, startAngle, endAngle);
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 5;
+            ctx.stroke(circlePath2);
+
+            // Create and store the path for the third rotating circle
+            var circlePath3 = new Path2D();
+            goal.angle3 = Math.atan2(player.y - goal.y, player.x - goal.x) + Math.PI;
+            startAngle = goal.angle3;
+            endAngle = startAngle + Math.PI * 2 - player.radius * 3 / goal.radius;
+            circlePath3.arc(goal.x, goal.y, goal.radius * 2, startAngle, endAngle);
+            ctx.strokeStyle = 'purple';
+            ctx.lineWidth = 5;
+            ctx.stroke(circlePath3);
+
+            // Check for collision with the rotating circles
+            if(!player.reset && 
+                (ctx.isPointInStroke(circlePath1, player.x, player.y) ||
+                 ctx.isPointInStroke(circlePath2, player.x, player.y) ||
+                 ctx.isPointInStroke(circlePath3, player.x, player.y))) {
+                player.reset = true;
+                player.flash = 3;
+                setTimeout(() => {player.reset = false}, 3000); // Wait for 3 seconds before resetting
+            }
+
+            // Reset and flash the player
+            if(player.reset) {
+                player.x = canvas.width / 2;
+                player.y = 50;
+                player.vx = 0;
+                player.vy = 0;
+            
+                if(player.flash > 0) {
+                    ctx.globalAlpha = 0.5;
+                    player.flash--;
+                } else {
+                    player.reset = false;
+                }
+            } else {
+                ctx.globalAlpha = 1;
+            }
+
+            // Draw the player
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+
+            // Draw the goal
+            ctx.beginPath();
+            ctx.arc(goal.x, goal.y, goal.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'green';
+            ctx.fill();
+
+            // Check for collision with the goal
+            var dx = player.x - goal.x;
+            var dy = player.y - goal.y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+            if(distance < player.radius + goal.radius) {
+                alert('You reached the goal!');
+                player.x = canvas.width / 2;
+                player.y = 50;
+                player.vx = 0;
+                player.vy = 0;
+            }
+
+            // Wrap player circle if out of screen bounds
+            if (player.x < -player.radius) player.x = canvas.width + player.radius;
+            if (player.x > canvas.width + player.radius) player.x = -player.radius;
+            if (player.y < -player.radius) player.y = canvas.height + player.radius;
+            if (player.y > canvas.height + player.radius) player.y = -player.radius;
+
+            // Request next animation frame
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
