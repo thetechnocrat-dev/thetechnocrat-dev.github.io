@@ -238,8 +238,8 @@
                 /* 
                 Godel's Gauntlet is an impossible game due to self-referencing of the player's position.
                 You must win by contradicting the coded rules of the game and changing the source code.
-                (Or for the lazy peek at the source code.) This game is a playful take on Godel's incompleteness
-                theorems. To join my semi-secret math hacker club, please dm me the answer to the following riddle:
+                (Or for the lazy peek at the source code.) To join my semi-secret math hacker club,
+                please dm me the answer to the following riddle:
  
                 When you measure how I rise over time, you are just measuring me, what am I?
                 */
@@ -256,14 +256,25 @@
                 }, 1000);
             }
 
+            // Get canvas width
+            var canvasWidth = canvas.width;
+
+            // Calculate font size based on canvas width
+            var welcomeFontSize = canvasWidth * 0.05; // Adjust the multiplier to get a suitable font size
+            var instructionFontSize = canvasWidth * 0.03; // Adjust the multiplier to get a suitable font size
+
+            // Ensure the font size is not too small or too large
+            welcomeFontSize = Math.max(Math.min(welcomeFontSize, 36), 18); // limit the font size between 18px and 36px
+            instructionFontSize = Math.max(Math.min(instructionFontSize, 24), 12); // limit the font size between 12px and 24px
+
             // Draw the welcome text
             ctx.fillStyle = "#AA6C39"; // or any color you prefer
-            ctx.font = "36px Arial"; // size and font face
+            ctx.font = welcomeFontSize + "px Arial"; // size and font face
             ctx.textAlign = "center"; // alignment
             ctx.fillText("Welcome to Gödel's Gauntlet", canvas.width/2, 110); // text and position
 
             // Draw the instruction text
-            ctx.font = "24px Arial"; // size and font face
+            ctx.font = instructionFontSize + "px Arial"; // size and font face
             ctx.textAlign = "center"; // alignment
             ctx.fillStyle = "#7E909A"; // or any color you prefer
             ctx.fillText("Click to move the circle towards the keyhole", canvas.width/2, 150); // text and position
