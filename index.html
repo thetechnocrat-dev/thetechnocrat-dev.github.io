@@ -26,7 +26,7 @@
         // Player and goal objects
         var player = { 
             x: canvas.width / 2, 
-            y: 50,
+            y: 140,
             radius: 20, 
             vx: 0, 
             vy: 0, 
@@ -35,7 +35,7 @@
         };
         var goal = { 
             x: canvas.width / 2, 
-            y: canvas.height / 2, 
+            y: canvas.height / 2 + 90, 
             radius: 42, 
             angle1: 0, 
             angle2: 0, 
@@ -224,6 +224,17 @@
                 }, 1000);
             }
 
+            // Draw the welcome text
+            ctx.fillStyle = "#AA6C39"; // or any color you prefer
+            ctx.font = "36px Arial"; // size and font face
+            ctx.textAlign = "center"; // alignment
+            ctx.fillText("Welcome to Gödel's Gauntlet", canvas.width/2, 50); // text and position
+
+            // Draw the instruction text
+            ctx.font = "24px Arial"; // size and font face
+            ctx.textAlign = "center"; // alignment
+            ctx.fillStyle = "#7E909A"; // or any color you prefer
+            ctx.fillText("Click to move the circle towards the keyhole", canvas.width/2, 90); // text and position
 
             // Request next animation frame
             requestAnimationFrame(gameLoop);
