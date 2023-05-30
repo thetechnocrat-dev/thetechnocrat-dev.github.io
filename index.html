@@ -9,10 +9,11 @@
     </style>
 </head>
 <body>
-    <a href="https://github.com/thetechnocrat-dev/thetechnocrat-dev.github.io/blob/main/index.html#L158" target="_blank">
-      <img src="github-logo.png" alt="GitHub Logo" width="24" height="24">
-      <span>This game is open source</span>
+    <a href="https://github.com/thetechnocrat-dev/thetechnocrat-dev.github.io/blob/main/index.html#L202" target="_blank" style="text-decoration: none; color: #3A78AB; font-family: Arial, sans-serif; font-size: 18px; background-color: #F8F9FA; border: 1px solid #3A78AB; border-radius: 5px; padding: 10px;">
+        <img src="github-logo.png" alt="GitHub Logo" width="24" height="24" style="vertical-align: middle; margin-right: 10px;">
+        <span>This Game is Open Source</span>
     </a>
+      
     <canvas id="gameCanvas"></canvas>
     <script>
         var canvas = document.getElementById('gameCanvas');
@@ -92,8 +93,8 @@
             var endAngleOuter = startAngleOuter + Math.PI * 2 - player.radius * 3 / goal.radius;
             var outerCircleRadius = goal.radius * 1.618 ** 3
             outerCirclePath.arc(goal.x, goal.y, outerCircleRadius, startAngleOuter, endAngleOuter);
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#482475';
+            ctx.lineWidth = 8;
             ctx.stroke(outerCirclePath);
 
             // Create and store the path for the middle rotating circle
@@ -103,8 +104,8 @@
             var endAngleMiddle = startAngleMiddle + Math.PI * 2 - player.radius * 3 / goal.radius;
             var middleCircleRadius = goal.radius * 1.618 ** 2
             middleCirclePath.arc(goal.x, goal.y, middleCircleRadius, startAngleMiddle, endAngleMiddle);
-            ctx.strokeStyle = 'blue';
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#482475';
+            ctx.lineWidth = 8;
             ctx.stroke(middleCirclePath);
 
             // Create and store the path for the inner rotating circle
@@ -114,8 +115,8 @@
             var endAngleInner = startAngleInner + Math.PI * 2 - player.radius * 3 / goal.radius;
             var innerCircleRadius = goal.radius * 1.618
             innerCirclePath.arc(goal.x, goal.y, innerCircleRadius, startAngleInner, endAngleInner);
-            ctx.strokeStyle = 'purple';
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#482475';
+            ctx.lineWidth = 8;
             ctx.stroke(innerCirclePath);
 
             var playerPath = new Path2D();
@@ -171,18 +172,58 @@
                 }, 1000);
             }
 
-
             // Draw the player
             ctx.beginPath();
             ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-            ctx.fillStyle = 'blue';
+            ctx.fillStyle = '#3A78AB';
             ctx.fill();
 
             // Draw the goal
             ctx.beginPath();
             ctx.arc(goal.x, goal.y, goal.radius, 0, Math.PI * 2);
-            ctx.fillStyle = 'green';
+            ctx.fillStyle = '#AA6C39';
             ctx.fill();
+
+            // Draw the circle part of the keyhole
+            ctx.beginPath();
+            ctx.arc(goal.x, goal.y - goal.radius / 4, goal.radius / 4, 0, Math.PI * 2, true); // true means counter-clockwise
+            ctx.fillStyle = 'white'; 
+            ctx.fill();
+
+            // Draw the triangular part of the keyhole
+            ctx.beginPath();
+            ctx.moveTo(goal.x, goal.y - goal.radius / 4); // Starting point of the triangle (the tip)
+            ctx.lineTo(goal.x - goal.radius / 4, goal.y + goal.radius / 2); // Bottom left corner of the triangle
+            ctx.lineTo(goal.x + goal.radius / 4, goal.y + goal.radius / 2); // Bottom right corner of the triangle
+            ctx.closePath();
+            ctx.fillStyle = 'white'; 
+            ctx.fill();
+
+            // Check for winning condition (within the keyhole)
+            if (player.x > goal.x - goal.radius && player.x < goal.x + goal.radius &&
+                player.y > goal.y && player.y < goal.y + goal.radius) {
+                alert("You win! Check the source code for a longer message");
+                /* 
+                Godel's Gauntlet is an impossible game due to self-referencing of the player's position.
+                You must win by contradicting the coded rules of the game and changing the source code.
+                (Or for the lazy peek at the source code.) To join my semi-secret math hacker club,
+                please dm me the answer to the following riddle:
+ 
+                When you measure how I rise over time, you are just measuring me, what am I?
+                */
+                player.target = {};
+                player.reset = true; 
+                player.freeze = true;
+                setTimeout(function() {
+                    console.log('done freeze')
+                    player.freeze = false;
+                    player.x = canvas.width / 2;
+                    player.y = 50;
+                    player.vx = 0;
+                    player.vy = 0;
+                }, 1000);
+            }
+
 
             // Request next animation frame
             requestAnimationFrame(gameLoop);
