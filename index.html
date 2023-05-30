@@ -35,7 +35,7 @@
         var goal = { 
             x: canvas.width / 2, 
             y: canvas.height / 2, 
-            radius: 30, 
+            radius: 42, 
             angle1: 0, 
             angle2: 0, 
             angle3: 0 
@@ -43,24 +43,20 @@
 
         // Listen for click events
         canvas.addEventListener('click', function(e) {
-            if (e.target.nodeName !== 'A') {
+            if (!player.freeze) {
                 var rect = canvas.getBoundingClientRect();
                 var clickX = e.clientX - rect.left;
                 var clickY = e.clientY - rect.top;
 
                 // Set the player's target
                 player.target = { x: clickX, y: clickY };
-
-                // Store the last click position
-                lastClick.x = clickX;
-                lastClick.y = clickY;
             }
         });
 
         // Main game loop
         function gameLoop() {
             // Move towards target if it exists
-            if(player.target) {
+            if (player.target) {
                 var dx = player.target.x - player.x;
                 var dy = player.target.y - player.y;
                 var distance = Math.sqrt(dx * dx + dy * dy);
@@ -89,62 +85,92 @@
             // Clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Create and store the path for the first rotating circle
-            var circlePath1 = new Path2D();
+            // Create and store the path for the outer rotating circle
+            var outerCirclePath = new Path2D();
             goal.angle1 += 0.01;
-            var startAngle = goal.angle1;
-            var endAngle = startAngle + Math.PI * 2 - player.radius * 3 / goal.radius;
-            circlePath1.arc(goal.x, goal.y, goal.radius * 3, startAngle, endAngle);
+            var startAngleOuter = goal.angle1;
+            var endAngleOuter = startAngleOuter + Math.PI * 2 - player.radius * 3 / goal.radius;
+            var outerCircleRadius = goal.radius * 1.618 ** 3
+            outerCirclePath.arc(goal.x, goal.y, outerCircleRadius, startAngleOuter, endAngleOuter);
             ctx.strokeStyle = 'red';
             ctx.lineWidth = 5;
-            ctx.stroke(circlePath1);
+            ctx.stroke(outerCirclePath);
 
-            // Create and store the path for the second rotating circle
-            var circlePath2 = new Path2D();
+            // Create and store the path for the middle rotating circle
+            var middleCirclePath = new Path2D();
             goal.angle2 -= 0.01;
-            startAngle = goal.angle2;
-            endAngle = startAngle + Math.PI * 2 - player.radius * 3 / goal.radius;
-            circlePath2.arc(goal.x, goal.y, goal.radius * 2.5, startAngle, endAngle);
+            var startAngleMiddle = goal.angle2;
+            var endAngleMiddle = startAngleMiddle + Math.PI * 2 - player.radius * 3 / goal.radius;
+            var middleCircleRadius = goal.radius * 1.618 ** 2
+            middleCirclePath.arc(goal.x, goal.y, middleCircleRadius, startAngleMiddle, endAngleMiddle);
             ctx.strokeStyle = 'blue';
             ctx.lineWidth = 5;
-            ctx.stroke(circlePath2);
+            ctx.stroke(middleCirclePath);
 
-            // Create and store the path for the third rotating circle
-            var circlePath3 = new Path2D();
+            // Create and store the path for the inner rotating circle
+            var innerCirclePath = new Path2D();
             goal.angle3 = Math.atan2(player.y - goal.y, player.x - goal.x) + Math.PI;
-            startAngle = goal.angle3;
-            endAngle = startAngle + Math.PI * 2 - player.radius * 3 / goal.radius;
-            circlePath3.arc(goal.x, goal.y, goal.radius * 2, startAngle, endAngle);
+            var startAngleInner = goal.angle3;
+            var endAngleInner = startAngleInner + Math.PI * 2 - player.radius * 3 / goal.radius;
+            var innerCircleRadius = goal.radius * 1.618
+            innerCirclePath.arc(goal.x, goal.y, innerCircleRadius, startAngleInner, endAngleInner);
             ctx.strokeStyle = 'purple';
             ctx.lineWidth = 5;
-            ctx.stroke(circlePath3);
+            ctx.stroke(innerCirclePath);
 
-            // Check for collision with the rotating circles
-            if(!player.reset && 
-                (ctx.isPointInStroke(circlePath1, player.x, player.y) ||
-                 ctx.isPointInStroke(circlePath2, player.x, player.y) ||
-                 ctx.isPointInStroke(circlePath3, player.x, player.y))) {
-                player.reset = true;
-                player.flash = 3;
-                setTimeout(() => {player.reset = false}, 3000); // Wait for 3 seconds before resetting
-            }
+            var playerPath = new Path2D();
+            playerPath.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
 
-            // Reset and flash the player
-            if(player.reset) {
-                player.x = canvas.width / 2;
-                player.y = 50;
-                player.vx = 0;
-                player.vy = 0;
-            
-                if(player.flash > 0) {
-                    ctx.globalAlpha = 0.5;
-                    player.flash--;
-                } else {
-                    player.reset = false;
-                }
+            // Create and store the paths for the outer rotating circle
+            var outerCirclePathOuter = new Path2D();
+            var outerCirclePathInner = new Path2D();
+            // modify radius for outer and inner invisible barriers
+            outerCirclePathOuter.arc(goal.x, goal.y, outerCircleRadius + player.radius, startAngleOuter, endAngleOuter);
+            outerCirclePathInner.arc(goal.x, goal.y, outerCircleRadius - player.radius, startAngleOuter, endAngleOuter);
+
+            // Create and store the paths for the middle rotating circle
+            var middleCirclePathOuter = new Path2D();
+            var middleCirclePathInner = new Path2D();
+            // modify radius for outer and inner invisible barriers
+            middleCirclePathOuter.arc(goal.x, goal.y, middleCircleRadius + player.radius, startAngleMiddle, endAngleMiddle);
+            middleCirclePathInner.arc(goal.x, goal.y, middleCircleRadius - player.radius, startAngleMiddle, endAngleMiddle);
+
+            // Create and store the paths for the inner rotating circle
+            var innerCirclePathOuter = new Path2D();
+            var innerCirclePathInner = new Path2D();
+            // modify radius for outer and inner invisible barriers
+            innerCirclePathOuter.arc(goal.x, goal.y, innerCircleRadius + player.radius, startAngleInner, endAngleInner);
+            innerCirclePathInner.arc(goal.x, goal.y, innerCircleRadius - player.radius, startAngleInner, endAngleInner);
+
+            // Reset and freeze the player
+            if (player.freeze) {
+               ctx.globalAlpha = 0.5;
             } else {
                 ctx.globalAlpha = 1;
             }
+
+            // Check for collision with the rotating circles
+            if (!player.freeze &&
+                (ctx.isPointInStroke(outerCirclePathOuter, player.x, player.y) ||
+                 ctx.isPointInStroke(outerCirclePathInner, player.x, player.y) ||
+                 ctx.isPointInStroke(middleCirclePathOuter, player.x, player.y) ||
+                 ctx.isPointInStroke(middleCirclePathInner, player.x, player.y) ||
+                 ctx.isPointInStroke(innerCirclePathOuter, player.x, player.y) ||
+                 ctx.isPointInStroke(innerCirclePathInner, player.x, player.y))) {
+                player.target = {};
+                player.reset = true; 
+                player.freeze = true;
+                setTimeout(function() {
+                    // Perform the desired change to the variable
+                    console.log('done freeze')
+                    player.freeze = false;
+                    player.x = canvas.width / 2;
+                    player.y = 50;
+                    player.vx = 0;
+                    player.vy = 0;
+                }, 1000);
+            }
+
 
             // Draw the player
             ctx.beginPath();
@@ -158,35 +184,11 @@
             ctx.fillStyle = 'green';
             ctx.fill();
 
-            // Check for collision with the goal
-            var dx = player.x - goal.x;
-            var dy = player.y - goal.y;
-            var distance = Math.sqrt(dx * dx + dy * dy);
-            if(distance < player.radius + goal.radius) {
-                alert('You reached the goal!');
-                player.x = canvas.width / 2;
-                player.y = 50;
-                player.vx = 0;
-                player.vy = 0;
-            }
-
-            // Wrap player circle if out of screen bounds
-            if (player.x < -player.radius) player.x = canvas.width + player.radius;
-            if (player.x > canvas.width + player.radius) player.x = -player.radius;
-            if (player.y < -player.radius) player.y = canvas.height + player.radius;
-            if (player.y > canvas.height + player.radius) player.y = -player.radius;
-
             // Request next animation frame
             requestAnimationFrame(gameLoop);
         }
 
         gameLoop();
     </script>
-    <script>
-        var githubLink = document.getElementById('github-link');
-        githubLink.addEventListener('click', function(event) {
-          event.stopPropagation();
-        });
-      </script>
 </body>
 </html>
