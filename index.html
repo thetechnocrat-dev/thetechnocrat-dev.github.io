@@ -1,289 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Godel's Gauntlet</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheTechnocrat</title>
     <style>
-        body { position: relative; }
-        a { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            z-index: 2; 
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: url('/images/background.png') no-repeat center center fixed;
+            background-size: cover;
         }
-        canvas { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            z-index: 1; 
+        .enchanted-table {
+            width: 80%;
+            margin: 5% auto;
+            border-collapse: collapse;
+            font-family: 'Arial', sans-serif;
+        }
+        .enchanted-table th, .enchanted-table td {
+            text-align: left;
+            padding: 12px;
+            color: #f8f8f2;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-bottom: 1px solid #f8f8f2;
+        }
+        .enchanted-table th {
+            font-size: 18px;
+        }
+        .enchanted-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
         }
     </style>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CXKTPMTN58"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'G-CXKTPMTN58');
-    </script>
 </head>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-CXKTPMTN58"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-CXKTPMTN58');
-</script>
-
 <body>
-    <a href="https://github.com/thetechnocrat-dev/thetechnocrat-dev.github.io/blob/main/index.html#L234" target="_blank" style="text-decoration: none; color: #3A78AB; font-family: Arial, sans-serif; font-size: 18px; background-color: #F8F9FA; border: 1px solid #3A78AB; border-radius: 5px; padding: 10px;">
-        <img src="github-logo.png" alt="GitHub Logo" width="24" height="24" style="vertical-align: middle; margin-right: 10px;">
-        <span>This Game is Open Source</span>
-    </a>
-      
-    <canvas id="gameCanvas"></canvas>
-    <script>
-        var canvas = document.getElementById('gameCanvas');
-        var ctx = canvas.getContext('2d');
-
-        // Set canvas size to fill the window
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Player and goal objects
-        var player = { 
-            x: canvas.width / 2, 
-            y: 200,
-            radius: 20, 
-            vx: 0, 
-            vy: 0, 
-            speed: 0.1, 
-            maxSpeed: 3
-        };
-        var goal = { 
-            x: canvas.width / 2, 
-            y: canvas.height / 2 + 150, 
-            radius: 42, 
-            angle1: 0, 
-            angle2: 0, 
-            angle3: 0 
-        };
-
-        // Listen for click events
-        canvas.addEventListener('click', function(e) {
-            if (!player.freeze) {
-                var rect = canvas.getBoundingClientRect();
-                var clickX = e.clientX - rect.left;
-                var clickY = e.clientY - rect.top;
-
-                // Set the player's target
-                player.target = { x: clickX, y: clickY };
-            }
-        });
-
-        // Main game loop
-        function gameLoop() {
-            // Move towards target if it exists
-            if (player.target) {
-                var dx = player.target.x - player.x;
-                var dy = player.target.y - player.y;
-                var distance = Math.sqrt(dx * dx + dy * dy);
-
-                if(distance > 1) {
-                    // Apply velocity to player position
-                    player.vx = dx / distance * player.speed;
-                    player.vy = dy / distance * player.speed;
-                    player.x += player.vx;
-                    player.y += player.vy;
-
-                    // Accelerate
-                    player.speed += 0.1;
-                    if(player.speed > player.maxSpeed) {
-                        player.speed = player.maxSpeed;
-                    }
-                } else {
-                    // Decelerate
-                    player.speed -= 0.1;
-                    if(player.speed < 0) {
-                        player.speed = 0;
-                    }
-                }
-            }
-
-            // Clear the canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Create and store the path for the outer rotating circle
-            var outerCirclePath = new Path2D();
-            goal.angle1 += 0.01;
-            var startAngleOuter = goal.angle1;
-            var endAngleOuter = startAngleOuter + Math.PI * 2 - player.radius * 3 / goal.radius;
-            var outerCircleRadius = goal.radius * 1.618 ** 3
-            outerCirclePath.arc(goal.x, goal.y, outerCircleRadius, startAngleOuter, endAngleOuter);
-            ctx.strokeStyle = '#482475';
-            ctx.lineWidth = 8;
-            ctx.stroke(outerCirclePath);
-
-            // Create and store the path for the middle rotating circle
-            var middleCirclePath = new Path2D();
-            goal.angle2 -= 0.01;
-            var startAngleMiddle = goal.angle2;
-            var endAngleMiddle = startAngleMiddle + Math.PI * 2 - player.radius * 3 / goal.radius;
-            var middleCircleRadius = goal.radius * 1.618 ** 2
-            middleCirclePath.arc(goal.x, goal.y, middleCircleRadius, startAngleMiddle, endAngleMiddle);
-            ctx.strokeStyle = '#482475';
-            ctx.lineWidth = 8;
-            ctx.stroke(middleCirclePath);
-
-            // Create and store the path for the inner rotating circle
-            var innerCirclePath = new Path2D();
-            goal.angle3 = Math.atan2(player.y - goal.y, player.x - goal.x) + Math.PI;
-            var startAngleInner = goal.angle3;
-            var endAngleInner = startAngleInner + Math.PI * 2 - player.radius * 3 / goal.radius;
-            var innerCircleRadius = goal.radius * 1.618
-            innerCirclePath.arc(goal.x, goal.y, innerCircleRadius, startAngleInner, endAngleInner);
-            ctx.strokeStyle = '#482475';
-            ctx.lineWidth = 8;
-            ctx.stroke(innerCirclePath);
-
-            var playerPath = new Path2D();
-            playerPath.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-
-            // Create and store the paths for the outer rotating circle
-            var outerCirclePathOuter = new Path2D();
-            var outerCirclePathInner = new Path2D();
-            // modify radius for outer and inner invisible barriers
-            outerCirclePathOuter.arc(goal.x, goal.y, outerCircleRadius + player.radius, startAngleOuter, endAngleOuter);
-            outerCirclePathInner.arc(goal.x, goal.y, outerCircleRadius - player.radius, startAngleOuter, endAngleOuter);
-
-            // Create and store the paths for the middle rotating circle
-            var middleCirclePathOuter = new Path2D();
-            var middleCirclePathInner = new Path2D();
-            // modify radius for outer and inner invisible barriers
-            middleCirclePathOuter.arc(goal.x, goal.y, middleCircleRadius + player.radius, startAngleMiddle, endAngleMiddle);
-            middleCirclePathInner.arc(goal.x, goal.y, middleCircleRadius - player.radius, startAngleMiddle, endAngleMiddle);
-
-            // Create and store the paths for the inner rotating circle
-            var innerCirclePathOuter = new Path2D();
-            var innerCirclePathInner = new Path2D();
-            // modify radius for outer and inner invisible barriers
-            innerCirclePathOuter.arc(goal.x, goal.y, innerCircleRadius + player.radius, startAngleInner, endAngleInner);
-            innerCirclePathInner.arc(goal.x, goal.y, innerCircleRadius - player.radius, startAngleInner, endAngleInner);
-
-            // Reset and freeze the player
-            if (player.freeze) {
-               ctx.globalAlpha = 0.5;
-            } else {
-                ctx.globalAlpha = 1;
-            }
-
-            // Check for collision with the rotating circles
-            if (!player.freeze &&
-                (ctx.isPointInStroke(outerCirclePathOuter, player.x, player.y) ||
-                 ctx.isPointInStroke(outerCirclePathInner, player.x, player.y) ||
-                 ctx.isPointInStroke(middleCirclePathOuter, player.x, player.y) ||
-                 ctx.isPointInStroke(middleCirclePathInner, player.x, player.y) ||
-                 ctx.isPointInStroke(innerCirclePathOuter, player.x, player.y) ||
-                 ctx.isPointInStroke(innerCirclePathInner, player.x, player.y))) {
-                player.target = {};
-                player.reset = true; 
-                player.freeze = true;
-                setTimeout(function() {
-                    // Perform the desired change to the variable
-                    console.log('done freeze')
-                    player.freeze = false;
-                    player.x = canvas.width / 2;
-                    player.y = 200;
-                    player.vx = 0;
-                    player.vy = 0;
-                }, 1000);
-            }
-
-            // Draw the player
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#3A78AB';
-            ctx.fill();
-
-            // Draw the goal
-            ctx.beginPath();
-            ctx.arc(goal.x, goal.y, goal.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#AA6C39';
-            ctx.fill();
-
-            // Draw the circle part of the keyhole
-            ctx.beginPath();
-            ctx.arc(goal.x, goal.y - goal.radius / 4, goal.radius / 4, 0, Math.PI * 2, true); // true means counter-clockwise
-            ctx.fillStyle = 'white'; 
-            ctx.fill();
-
-            // Draw the triangular part of the keyhole
-            ctx.beginPath();
-            ctx.moveTo(goal.x, goal.y - goal.radius / 4); // Starting point of the triangle (the tip)
-            ctx.lineTo(goal.x - goal.radius / 4, goal.y + goal.radius / 2); // Bottom left corner of the triangle
-            ctx.lineTo(goal.x + goal.radius / 4, goal.y + goal.radius / 2); // Bottom right corner of the triangle
-            ctx.closePath();
-            ctx.fillStyle = 'white'; 
-            ctx.fill();
-
-            // Check for winning condition (within the keyhole)
-            if (player.x > goal.x - goal.radius && player.x < goal.x + goal.radius &&
-                player.y > goal.y && player.y < goal.y + goal.radius) {
-                alert("You win! Check the source code for a longer message");
-                /* 
-                Godel's Gauntlet is an impossible game due to self-referencing of the player's position.
-                You must win by contradicting the coded rules of the game and changing the source code.
-                (Or for the lazy peek at the source code.) To join my semi-secret math hacker club,
-                please dm me the answer to the following riddle:
- 
-                When you measure how I rise over time, you are just measuring me, what am I?
-                */
-                player.target = {};
-                player.reset = true; 
-                player.freeze = true;
-                setTimeout(function() {
-                    console.log('done freeze')
-                    player.freeze = false;
-                    player.x = canvas.width / 2;
-                    player.y = 200;
-                    player.vx = 0;
-                    player.vy = 0;
-                }, 1000);
-            }
-
-            // Get canvas width
-            var canvasWidth = canvas.width;
-
-            // Calculate font size based on canvas width
-            var welcomeFontSize = canvasWidth * 0.05; // Adjust the multiplier to get a suitable font size
-            var instructionFontSize = canvasWidth * 0.03; // Adjust the multiplier to get a suitable font size
-
-            // Ensure the font size is not too small or too large
-            welcomeFontSize = Math.max(Math.min(welcomeFontSize, 36), 18); // limit the font size between 18px and 36px
-            instructionFontSize = Math.max(Math.min(instructionFontSize, 24), 12); // limit the font size between 12px and 24px
-
-            // Draw the welcome text
-            ctx.fillStyle = "#AA6C39"; // or any color you prefer
-            ctx.font = welcomeFontSize + "px Arial"; // size and font face
-            ctx.textAlign = "center"; // alignment
-            ctx.fillText("Welcome to Gödel's Gauntlet", canvas.width/2, 110); // text and position
-
-            // Draw the instruction text
-            ctx.font = instructionFontSize + "px Arial"; // size and font face
-            ctx.textAlign = "center"; // alignment
-            ctx.fillStyle = "#7E909A"; // or any color you prefer
-            ctx.fillText("Click to move the circle towards the keyhole", canvas.width/2, 150); // text and position
-
-            // Request next animation frame
-            requestAnimationFrame(gameLoop);
-        }
-
-        gameLoop();
-    </script>
+    <table class="enchanted-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>State</th>
+                <th>Deadline</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr onclick="window.location='https://forum.citydao.io/t/draft-cip-205-treasury-management/2298';">
+                <td>CityDAO Treasury Management</td>
+                <th>Draft</th>
+                <td>Q1 2024</td>
+            </tr>
+            <!-- Repeat the above row for more entries, updating the onclick URL for each -->
+        </tbody>
+    </table>
 </body>
 </html>
